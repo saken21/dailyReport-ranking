@@ -1,0 +1,5 @@
+-cp src
+-main src.Main
+-js ../dailyReport/html/files/js/ranking.js
+-lib createjs
+-cp ../../haxe/
