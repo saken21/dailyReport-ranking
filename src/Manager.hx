@@ -9,6 +9,7 @@ class Manager {
 	
 	public static var TEAM_LIST   :Array<String> = ['Edit','Design','DTP','Web'];
 	public static var TEAM_LIST_JP:Array<String> = ['編集','デザイン','DTP','Web'];
+	public static var WEEK_LIST   :Array<String> = ['日','月','火','水','木','金','土'];
 	
 	/* =======================================================================
 	Public - Init

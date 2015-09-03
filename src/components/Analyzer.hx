@@ -6,75 +6,95 @@ import src.db.Members;
  
 class Analyzer {
 	
-	private static var _individual:Array<Dynamic>;
-	private static var _team      :Map<String,Int>;
+	private static var _data:Map<String,Array<Map<String,Dynamic>>>;
+	private static var _keys:Array<String> = ['individual','team','report','day','hour','length'];
 	
 	/* =======================================================================
 	Public - Init
 	========================================================================== */
 	public static function init():Void {
 		
-		var reports:Array<Dynamic> = Reports.db;
-		var members:Array<Dynamic> = Members.db;
+		_data = new Map();
 		
-		_individual = [];
-		_team = new Map();
-		
-		for (p in 0...Manager.TEAM_LIST.length) _team.set(Manager.TEAM_LIST[p],0);
-		
-		for (p in 0...reports.length) {
-			
-			var info:Dynamic = reports[p];
-			if (info == null) continue;
-			
-			var memberID  :Int     = info.member_id;
-			var memberInfo:Dynamic = members[memberID];
-			var memberName:String  = memberInfo.name;
-			var team      :String  = memberInfo.team;
-			var starList  :String  = info.star_list;
-			var starLength:Int     = starList.split(',').length;
-			
-			if (starList.length == 0) starLength = 0;
-			
-			addIndividual(memberID,memberName,starLength);
-			addTeam(team,starLength);
-			
+		for (p in 0..._keys.length) {
+			_data.set(_keys[p],[]);
 		}
 		
-		_individual.sort(function(a:Dynamic,b:Dynamic):Int { return Math.floor(b.star - a.star); });
+		for (p in 0...Reports.db.length) {
+			analyzeReport(Reports.db[p]);
+		}
 		
-		View.setIndividual(_individual);
-		View.setTeam(_team);
-		View.setReport([]);
-		View.setDay([]);
-		View.setTime([]);
-		View.setLength([]);
+		for (p in 0..._keys.length) {
+			
+			var key:String = _keys[p];
+			var array:Array<Map<String,Dynamic>> = _data.get(key);
+			
+			sortData(array);
+			View.setHTML(array,key);
 		
-	}
-	
-	/* =======================================================================
-	Add Individual
-	========================================================================== */
-	private static function addIndividual(id:Int,memberName:String,starLength:Int):Void {
-		
-		var result:Int = (_individual[id] == null) ? 0 : _individual[id].star;
-		result += starLength;
-		
-		_individual[id] = { name:memberName, star:result };
+		}
 		
 	}
 	
 	/* =======================================================================
-	Add Team
+	Analyze Report
 	========================================================================== */
-	private static function addTeam(team:String,starLength:Int):Void {
+	private static function analyzeReport(info:Dynamic):Void {
 		
-		if (!_team.exists(team)) return;
+		if (info == null) return;
 		
-		var result:Int = _team.get(team);
+		var reportID  :Int     = info.id;
+		var memberID  :Int     = info.member_id;
+		var memberInfo:Dynamic = Members.db[memberID];
+		var memberName:String  = memberInfo.name;
+		var teamID    :Int     = Manager.TEAM_LIST.indexOf(memberInfo.team);
+		var note      :String  = info.note;
+		var date      :String  = info.date;
+		var updatetime:String  = info.updatetime;
+		var starList  :String  = info.star_list;
+		var starLength:Int     = starList.split(',').length;
+		var day       :Int     = Date.fromString(date).getDay();
+		var hour      :Int     = Date.fromString(updatetime).getHours();
+		var length    :Int     = Math.floor(note.length / 10);
+		
+		if (starList.length == 0) starLength = 0;
+		
+		addData(_data.get('individual'),memberID,starLength,['name'],[memberName]);
+		addData(_data.get('team'),teamID,starLength,['team'],[Manager.TEAM_LIST_JP[teamID]]);
+		addData(_data.get('report'),reportID,starLength,['name','note','date'],[memberName,note,date]);
+		addData(_data.get('day'),day,starLength,['day'],[Manager.WEEK_LIST[day]]);
+		addData(_data.get('hour'),hour,starLength,['hour'],[hour]);
+		addData(_data.get('length'),length,starLength,['length'],[length * 10]);
+		
+	}
+	
+	/* =======================================================================
+	Add Data
+	========================================================================== */
+	private static function addData(array:Array<Map<String,Dynamic>>,key:Int,starLength:Int,columns:Array<String>,values:Array<Dynamic>):Void {
+		
+		var result:Int = (array[key] == null) ? 0 : array[key].get('star');
 		result += starLength;
 		
-		_team.set(team,result);
+		var map:Map<String,Dynamic> = new Map();
+		
+		for (p in 0...columns.length) {
+			map.set(columns[p],values[p]);
+		}
+		
+		map.set('star',result);
+		array[key] = map;
+		
+	}
+	
+	/* =======================================================================
+	Sort Data
+	========================================================================== */
+	private static function sortData(array:Array<Map<String,Dynamic>>):Void {
+		
+		array.sort(function(a:Dynamic,b:Dynamic):Int {
+			return Math.floor(b.get('star') - a.get('star'));
+		});
 		
 	}
 
