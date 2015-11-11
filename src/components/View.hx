@@ -19,7 +19,8 @@ class View {
 		_data.set('individual',['name','star']);
 		_data.set('team',['team','star']);
 		_data.set('report',['date','name','star','note']);
-		_data.set('day',['day','star']);
+		//_data.set('day',['day','star']);
+		_data.set('contribution',['name','star']);
 		_data.set('hour',['hour','star']);
 		_data.set('length',['length','star']);
 		

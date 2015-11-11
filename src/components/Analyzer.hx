@@ -7,7 +7,7 @@ import src.db.Members;
 class Analyzer {
 	
 	private static var _data:Map<String,Array<Map<String,Dynamic>>>;
-	private static var _keys:Array<String> = ['individual','team','report','day','hour','length'];
+	private static var _keys:Array<String> = ['individual','team','report','contribution','hour','length'];
 	
 	/* =======================================================================
 	Public - Init
@@ -62,9 +62,30 @@ class Analyzer {
 		addData(_data.get('individual'),memberID,starLength,['name'],[memberName]);
 		addData(_data.get('team'),teamID,starLength,['team'],[Manager.TEAM_LIST_JP[teamID]]);
 		addData(_data.get('report'),reportID,starLength,['name','note','date'],[memberName,note,date]);
-		addData(_data.get('day'),day,starLength,['day'],[Manager.WEEK_LIST[day]]);
+		//addData(_data.get('day'),day,starLength,['day'],[Manager.WEEK_LIST[day]]);
 		addData(_data.get('hour'),hour,starLength,['hour'],[hour]);
 		addData(_data.get('length'),length,starLength,['length'],[length * 10]);
+		
+		if (starLength > 0) {
+			addContribution(starList.split(','));
+		}
+		
+	}
+	
+	/* =======================================================================
+	Add Contribution
+	========================================================================== */
+	private static function addContribution(starList:Array<String>):Void {
+		
+		for (i in 0...starList.length) {
+			
+			var memberID  :Int     = Std.parseInt(starList[i]);
+			var memberInfo:Dynamic = Members.db[memberID];
+			var memberName:String  = memberInfo.name;
+			
+			addData(_data.get('contribution'),memberID,1,['name'],[memberName]);
+			
+		}
 		
 	}
 	
