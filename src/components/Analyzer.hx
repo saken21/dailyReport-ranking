@@ -81,7 +81,15 @@ class Analyzer {
 			
 			var memberID  :Int     = Std.parseInt(starList[i]);
 			var memberInfo:Dynamic = Members.db[memberID];
-			var memberName:String  = memberInfo.name;
+			
+			if (memberInfo == null) {
+				
+				trace('error : ' + memberID);
+				continue;
+				
+			}
+			
+			var memberName:String = memberInfo.name;
 			
 			addData(_data.get('contribution'),memberID,1,['name'],[memberName]);
 			
